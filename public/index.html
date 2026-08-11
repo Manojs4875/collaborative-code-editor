@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+<input type="text" id="username" placeholder="Enter username">
+<button id="join">Join</button>
+<input type="text" id="receiver" placeholder="Enter recipient username">
+  <input id="messageInput" type="text" placeholder="Type a message...">
+  <button id="sendButton">Send</button>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const usernameInput = document.getElementById('username');
+    const joinButton = document.getElementById('join');
+    const receiver = document.getElementById('receiver');
+    const socket = io();
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+
+    joinButton.addEventListener('click', () => {
+        const username = usernameInput.value;
+        if (username) {
+            socket.emit('join', username);
+        }
+    });
+
+    // add element to display messages
+    const messagesContainer = document.createElement('div');
+    document.body.appendChild(messagesContainer);
+   
+    sendButton.addEventListener('click', () => {
+        const message = messageInput.value;
+        const recipient = receiver.value;
+        const username = usernameInput.value;
+        socket.emit('message', { message, recipient, username });
+        messageInput.value = '';
+    });
+     socket.on('message', (data) => {
+
+    console.log("SERVER RECEIVED:", data);
+    console.log("MESSAGE:", data.message);
+        const  {message, username} = data;
+        const messageElement = document.createElement('p');
+        messageElement.textContent = `${username}: ${message}`;
+        messagesContainer.appendChild(messageElement);
+    });
+</script>
+</body>
+</html>
