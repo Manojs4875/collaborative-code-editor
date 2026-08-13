@@ -1,7 +1,6 @@
 const express=require(`express`);
 const  http=require(`http`);
 const app=express();
-const Project=require('./models/project.js')
 const {Server}=require(`socket.io`);
 const mongoose=require('mongoose');
 const server=http.createServer(app);
@@ -20,14 +19,8 @@ mongoose.connect('mongodb://localhost:27017/ChatApp').then(()=>{
     console.log(err);
 });
 app.use(express.urlencoded({extended:true}));
-
-
-app.get('/',checkauthentication,async (req,res)=>{
-    // owner  is current user 
-    const projects = await Project.find({
-    owner: req.user._id
-});
-    res.render(`home`,{projects});
+app.get('/',checkauthentication,(req,res)=>{
+    res.render(`home`);
 });
 app.get('/login',(req,res)=>{
     res.render(`login`);

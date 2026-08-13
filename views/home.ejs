@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+    <h1>Code Collab</h1>
+
+<h2>My Projects</h2>
+
+<form action="/project" method="POST">
+    <input
+        type="text"
+        name="name"
+        placeholder="Project name"
+        required
+    >
+
+    <button type="submit">Create Project</button>
+</form>
+
+<hr>
+
+<% if (projects.length === 0) { %>
+
+    <p>No projects yet. Create your first project!</p>
+
+<% } else { %>
+
+    <% projects.forEach(project => { %>
+
+        <div>
+            <h3><%= project.name %></h3>
+
+            <a href="/project/<%= project._id %>">
+                Open Project
+            </a>
+        </div>
+
+    <% }) %>
+
+<% } %>
+</body>
+</html>
