@@ -5,6 +5,7 @@ const Project=require('./models/project.js')
 const {Server}=require(`socket.io`);
 const mongoose=require('mongoose');
 const server=http.createServer(app);
+const projectRouter=require(`./router/project.js`);
 const io=new Server(server);
 const userRouter=require(`./router/user.js`);
 const cookie=require(`cookie-parser`);
@@ -25,7 +26,7 @@ app.use(express.urlencoded({extended:true}));
 app.get('/',checkauthentication,async (req,res)=>{
     // owner  is current user 
     const projects = await Project.find({
-    owner: req.user._id
+    owner: req.user.id
 });
     res.render(`home`,{projects});
 });
@@ -35,6 +36,7 @@ app.get('/login',(req,res)=>{
 app.get('/register',(req,res)=>{
     res.render(`registration`);
 });
+app.use('/project',checkauthentication,projectRouter);
 app.use('/user',userRouter);
 server.listen(8000,()=>{
     console.log(`server is running on port 8000`);

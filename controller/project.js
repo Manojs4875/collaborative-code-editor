@@ -1,11 +1,17 @@
 const Project=require("../models/project.js");
 async function createProject(req, res){
-    //create
-    await Project.create({
-        name:Project.name,
-        owner:req.user._id
+   
+    const {name}=req.body;
+    if(!name){
+        return res.render(`home`,{error:`Project name is required`});
+    }
+    console.log("REQ.USER =", req.user);
+console.log("USER ID =", req.user?.id);
+    const proj=await Project.create({
+        name:name,
+        owner:req.user.id
     })
-    return res.redirect(`/project/${Project._id}`);
+    return res.redirect(`/project/${proj._id}`);
 
 }
 module.exports={createProject};
