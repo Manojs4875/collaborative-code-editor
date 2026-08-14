@@ -1,6 +1,10 @@
 const express=require('express');
 const checkAuthentication=require('../middleware/checkauthentication.js');
 const router=express.Router();
-const {createProject}=require('../controller/project.js');
+const {createProject,getProject,createFile,getFile,updateFile}=require('../controller/project.js');
 router.post('/',checkAuthentication,createProject);
+router.get("/:id", getProject);
+router.post("/:id/file", checkAuthentication, createFile);
+router.get("/:projectId/file/:fileId", getFile);
+router.post("/:projectId/file/:fileId", updateFile);
 module.exports=router;

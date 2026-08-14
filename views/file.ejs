@@ -1,0 +1,7 @@
+<form action="/project/<%= project._id %>/file/<%= file._id %>" method="POST">
+
+    <textarea name="content" rows="20" cols="100"><%= file.content %></textarea>
+
+    <button type="submit">Save</button>
+
+</form>
