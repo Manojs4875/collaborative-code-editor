@@ -78,6 +78,6 @@ async function updateFile(req, res) {
         content: content
     });
 
-    res.redirect(`/project/${projectId}/file/${fileId}`);
+    res.redirect(`/project/${projectId}`);
 }
 module.exports={createProject,getProject,createFile,getFile,updateFile};
