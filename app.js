@@ -21,10 +21,25 @@ mongoose.connect('mongodb://localhost:27017/ChatApp').then(()=>{
     console.log(err);
 });
 app.use(express.urlencoded({extended:true}));
+io.on("connection", (socket) => {
 
+    socket.on("join-file", (fileId) => {
+        socket.join(fileId);
+
+        console.log("User joined file:", fileId);
+    });
+    socket.on("code-change", (data) => {
+
+    socket.to(data.fileId).emit("code-change", {
+        content: data.content
+    });
+
+});
+
+});
 
 app.get('/',checkauthentication,async (req,res)=>{
-    // owner  is current user 
+   
     const projects = await Project.find({
     owner: req.user.id
 });
