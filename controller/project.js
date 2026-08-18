@@ -63,10 +63,11 @@ async function getFile(req, res) {
     if (!file) {
         return res.status(404).send("File not found");
     }
-
+    const user=req.user;
     res.render("file", {
         project,
-        file
+        file,
+        user
     });
 }
 async function updateFile(req, res) {

@@ -5,6 +5,6 @@ const {createProject,getProject,createFile,getFile,updateFile}=require('../contr
 router.post('/',checkAuthentication,createProject);
 router.get("/:id", getProject);
 router.post("/:id/file", checkAuthentication, createFile);
-router.get("/:projectId/file/:fileId", getFile);
-router.post("/:projectId/file/:fileId", updateFile);
+router.get("/:projectId/file/:fileId",checkAuthentication, getFile);
+router.post("/:projectId/file/:fileId", checkAuthentication, updateFile);
 module.exports=router;

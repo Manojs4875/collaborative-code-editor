@@ -9,7 +9,8 @@
     <input type="hidden" name="content" id="content">
 
     <button type="submit">Save</button>
-
+    <h3>Currently editing</h3>
+    <div id="users"></div>
 </form>
 
 <script src="/socket.io/socket.io.js"></script>
@@ -26,7 +27,7 @@
         const editor = monaco.editor.create(
             document.getElementById("editor"),
             {
-                value:  <%- JSON.stringify(file.content || "") %>,
+                value: <% - JSON.stringify(file.content || "") %>,
                 language: "javascript",
                 theme: "vs-dark",
                 automaticLayout: true
@@ -38,27 +39,53 @@
 
         });
         const socket = io();
-        var remotechange=false;
+        var remotechange = false;
         const fileId = "<%= file._id %>";
-        socket.on("code-change", (data) => {
-            remotechange=true;
-            editor.setValue(data.content);
-            remotechange=false;
+        const username = "<%= user.username %>";
+        socket.on("user-joined", (data) => {
 
-        });
-        editor.onDidChangeModelContent(() => {
-            if(remotechange) return;
-            const content = editor.getValue();
-            console.log("Sending:", content);
-            socket.emit("code-change", {
-                fileId: fileId,
-                content: content
+            const usersDiv = document.getElementById("users");
+
+            usersDiv.innerHTML = "";
+
+            data.forEach(user => {
+
+                usersDiv.innerHTML += `
+            <p>🟢 ${user.username}</p>
+        `;
+
             });
 
         });
+        socket.on("code-change", (data) => {
+            remotechange = true;
+            editor.setValue(data.content);
+            remotechange = false;
 
-        socket.emit("join-file", fileId);
+        });
+        let debounceTimer;
+
+        editor.onDidChangeModelContent(() => {
+            if (remotechange) return;
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                const content = editor.getValue();
+                console.log("Sending:", content);
+                socket.emit("code-change", {
+                    fileId: fileId,
+                    content: content
+                });
+            }, 300);
+
+        });
+
+        socket.emit("join-file", {
+            fileId: fileId,
+            username: username
+        });
 
     });
+
+
 
 </script>
