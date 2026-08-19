@@ -27,7 +27,7 @@
         const editor = monaco.editor.create(
             document.getElementById("editor"),
             {
-                value: <% - JSON.stringify(file.content || "") %>,
+                value: <%- JSON.stringify(file.content || "") %>,
                 language: "javascript",
                 theme: "vs-dark",
                 automaticLayout: true

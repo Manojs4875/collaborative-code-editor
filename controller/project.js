@@ -1,5 +1,6 @@
 const Project=require("../models/project.js");
 const File = require("../models/file");
+const User = require("../models/user");
 async function createProject(req, res){
    
     const {name}=req.body;
@@ -81,4 +82,27 @@ async function updateFile(req, res) {
 
     res.redirect(`/project/${projectId}`);
 }
-module.exports={createProject,getProject,createFile,getFile,updateFile};
+async function addCollaborator(req, res) {
+    const { projectId } = req.params;
+    const { collaboratorEmail } = req.body;
+
+    const project = await Project.findById(projectId);
+     console.log(collaboratorEmail);
+    if (!project) {
+        return res.status(404).send("Project not found");
+    }
+
+    const user=await User.findOne({ email: collaboratorEmail });
+    console.log(user);
+    if (!user) {
+        return res.status(404).send("User not found");
+    }
+   
+    if (project.owner.toString() !== req.user.id) {
+    return res.status(403).send("Only the owner can add collaborators");
+    }
+    project.collaborators.push(user._id);
+    await project.save();
+    res.redirect(`/project/${projectId}`);
+}
+module.exports={createProject,getProject,createFile,getFile,updateFile,addCollaborator};

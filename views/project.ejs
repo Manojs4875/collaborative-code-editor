@@ -9,6 +9,7 @@
     </div>
 
 <% }) %>
+
 <form action="/project/<%= project._id %>/file" method="POST">
 
     <input
@@ -20,6 +21,22 @@
 
     <button type="submit">
         Create File
+    </button>
+
+</form>
+<h2>Add Collaborator</h2>
+
+<form action="/project/<%= project._id %>/collaborator" method="POST">
+
+    <input 
+        type="email"
+        name="collaboratorEmail"
+        placeholder="Collaborator email"
+        required
+    >
+
+    <button type="submit">
+        Add Collaborator
     </button>
 
 </form>

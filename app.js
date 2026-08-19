@@ -66,9 +66,12 @@ io.on("connection", (socket) => {
 });
 
 app.get('/', checkauthentication, async (req, res) => {
-
+    // display all projects for the logged-in user
     const projects = await Project.find({
-        owner: req.user.id
+    $or: [
+        { owner: req.user.id },
+        { collaborators: req.user.id }
+    ]
     });
     res.render(`home`, { projects });
 });
