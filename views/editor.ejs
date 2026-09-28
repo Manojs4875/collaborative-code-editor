@@ -1,11 +1,485 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title></title>
+
+    <title>CodeCollab - Editor</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+
+        /* Navbar */
+
+        .navbar {
+            height: 60px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 25px;
+
+            background: #111827;
+            border-bottom: 1px solid #334155;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            color: #60a5fa;
+        }
+
+        .editor-title {
+            color: #cbd5e1;
+            font-size: 14px;
+        }
+
+        .back-btn {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back-btn:hover {
+            color: white;
+        }
+
+        /* Main */
+
+        .container {
+            max-width: 1400px;
+            margin: auto;
+            padding: 25px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            margin-bottom: 15px;
+        }
+
+        .header h1 {
+            font-size: 22px;
+        }
+
+        .header p {
+            margin-top: 5px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        /* Active users */
+
+        .active-users {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .active-title {
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        #users {
+            display: flex;
+            gap: 6px;
+        }
+
+        .user {
+            padding: 6px 10px;
+
+            background: #1e293b;
+            border: 1px solid #334155;
+
+            border-radius: 20px;
+
+            font-size: 12px;
+        }
+
+        /* Editor */
+
+        .editor-wrapper {
+            border: 1px solid #334155;
+            border-radius: 10px;
+            overflow: hidden;
+
+            background: #1e1e1e;
+        }
+
+        #editor {
+            width: 100%;
+            height: 650px;
+        }
+
+        /* Bottom bar */
+
+        .bottom-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            margin-top: 15px;
+        }
+
+        .status {
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .save-btn {
+            padding: 10px 20px;
+
+            background: #2563eb;
+            color: white;
+
+            border: none;
+            border-radius: 7px;
+
+            font-size: 14px;
+            font-weight: 600;
+
+            cursor: pointer;
+        }
+
+        .save-btn:hover {
+            background: #1d4ed8;
+        }
+
+        /* Mobile */
+
+        @media (max-width: 700px) {
+
+            .navbar {
+                padding: 0 15px;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            #editor {
+                height: 500px;
+            }
+
+            .bottom-bar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+
+            .save-btn {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
+
 <body>
-    
+
+    <!-- Navbar -->
+
+    <nav class="navbar">
+
+        <div class="logo">
+            CodeCollab
+        </div>
+
+        <div class="editor-title">
+            Collaborative Editor
+        </div>
+
+        <a href="/project" class="back-btn">
+            ← Projects
+        </a>
+
+    </nav>
+
+
+    <!-- Main -->
+
+    <main class="container">
+
+        <div class="header">
+
+            <div>
+                <h1>
+                    Code Editor
+                </h1>
+
+                <p>
+                    Write and collaborate on code in real time.
+                </p>
+            </div>
+
+
+            <div class="active-users">
+
+                <span class="active-title">
+                    Active:
+                </span>
+
+                <div id="users"></div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Monaco Editor -->
+
+        <div class="editor-wrapper">
+
+            <div id="editor"></div>
+
+        </div>
+
+
+        <!-- Bottom -->
+
+        <div class="bottom-bar">
+
+            <span class="status">
+                ● Connected
+            </span>
+
+            <button
+                type="button"
+                class="save-btn"
+                id="saveBtn"
+            >
+                Save
+            </button>
+
+        </div>
+
+    </main>
+
+
+    <!-- Socket.IO -->
+
+    <script src="/socket.io/socket.io.js"></script>
+
+    <!-- Monaco -->
+
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.js"></script>
+
+    <script>
+
+        require.config({
+            paths: {
+                vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs"
+            }
+        });
+
+
+        require(
+            ["vs/editor/editor.main"],
+            function () {
+
+                const editor = monaco.editor.create(
+                    document.getElementById("editor"),
+                    {
+                        value: "",
+
+                        language: "javascript",
+
+                        theme: "vs-dark",
+
+                        automaticLayout: true,
+
+                        fontSize: 14,
+
+                        tabSize: 4,
+
+                        minimap: {
+                            enabled: true
+                        }
+                    }
+                );
+
+
+                /*
+                 * Socket.IO
+                 */
+
+                const socket = io();
+
+
+                /*
+                 * Prevent remote changes
+                 * from being emitted again.
+                 */
+
+                let remotechange = false;
+
+                let debounceTimer;
+
+
+                /*
+                 * Example file ID.
+                 *
+                 * If this page receives file data
+                 * from EJS, replace this with:
+                 *
+                 * const fileId = "<%= file._id %>";
+                 */
+
+                const fileId =
+                    "<%= typeof file !== 'undefined' ? file._id : '' %>";
+
+
+                const username =
+                    "<%= typeof user !== 'undefined' ? user.username : '' %>";
+
+
+                /*
+                 * Join file room
+                 */
+
+                if (fileId) {
+
+                    socket.emit(
+                        "join-file",
+                        {
+                            fileId: fileId,
+                            username: username
+                        }
+                    );
+
+                }
+
+
+                /*
+                 * Receive remote code
+                 */
+
+                socket.on(
+                    "code-change",
+                    (data) => {
+
+                        remotechange = true;
+
+                        editor.setValue(data.content);
+
+                        remotechange = false;
+
+                    }
+                );
+
+
+                /*
+                 * Send code changes
+                 */
+
+                editor.onDidChangeModelContent(
+                    () => {
+
+                        if (remotechange) {
+                            return;
+                        }
+
+                        clearTimeout(debounceTimer);
+
+                        debounceTimer = setTimeout(
+                            () => {
+
+                                if (!fileId) {
+                                    return;
+                                }
+
+                                socket.emit(
+                                    "code-change",
+                                    {
+                                        fileId: fileId,
+                                        content: editor.getValue()
+                                    }
+                                );
+
+                            },
+                            300
+                        );
+
+                    }
+                );
+
+
+                /*
+                 * Active users
+                 */
+
+                socket.on(
+                    "users-in-file",
+                    (users) => {
+
+                        const usersDiv =
+                            document.getElementById("users");
+
+                        usersDiv.innerHTML = "";
+
+                        users.forEach(
+                            (user) => {
+
+                                usersDiv.innerHTML += `
+                                    <span class="user">
+                                        🟢 ${user.username}
+                                    </span>
+                                `;
+
+                            }
+                        );
+
+                    }
+                );
+
+
+                /*
+                 * Save button
+                 *
+                 * If you use your existing POST
+                 * save route, connect it here.
+                 */
+
+                document
+                    .getElementById("saveBtn")
+                    .addEventListener(
+                        "click",
+                        () => {
+
+                            console.log(
+                                "Code to save:",
+                                editor.getValue()
+                            );
+
+                        }
+                    );
+
+            }
+        );
+
+    </script>
+
 </body>
+
 </html>

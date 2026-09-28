@@ -1,42 +1,301 @@
-<h1><%= project.name %></h1>
-<h2>Files</h2>
-<% files.forEach(file => { %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <div>
-        <a href="/project/<%= project._id %>/file/<%= file._id %>">
-            <%= file.name %>
-        </a>
-    </div>
+    <title><%= project.name %> - CodeCollab</title>
 
-<% }) %>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-<form action="/project/<%= project._id %>/file" method="POST">
+        body {
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            background: #0f172a;
+            color: #e2e8f0;
+        }
 
-    <input
-        type="text"
-        name="name"
-        placeholder="File name"
-        required
-    >
+        .navbar {
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            background: #111827;
+            border-bottom: 1px solid #334155;
+        }
 
-    <button type="submit">
-        Create File
-    </button>
+        .brand {
+            font-size: 21px;
+            font-weight: bold;
+            color: #60a5fa;
+        }
 
-</form>
-<h2>Add Collaborator</h2>
+        .project-name {
+            color: #cbd5e1;
+            font-size: 15px;
+        }
 
-<form action="/project/<%= project._id %>/collaborator" method="POST">
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
 
-    <input 
-        type="email"
-        name="collaboratorEmail"
-        placeholder="Collaborator email"
-        required
-    >
+        .header {
+            margin-bottom: 30px;
+        }
 
-    <button type="submit">
-        Add Collaborator
-    </button>
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
 
-</form>
+        .header p {
+            color: #94a3b8;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .card h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .file-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 22px;
+        }
+
+        .file {
+            display: flex;
+            align-items: center;
+            padding: 12px 14px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+
+        .file:hover {
+            border-color: #60a5fa;
+            transform: translateY(-1px);
+        }
+
+        .file a {
+            color: #cbd5e1;
+            text-decoration: none;
+            width: 100%;
+        }
+
+        .file a:hover {
+            color: #60a5fa;
+        }
+
+        .empty {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        form {
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            flex: 1;
+            padding: 11px 13px;
+            background: #0f172a;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            color: #f8fafc;
+            outline: none;
+            font-size: 14px;
+        }
+
+        input::placeholder {
+            color: #64748b;
+        }
+
+        input:focus {
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.12);
+        }
+
+        button {
+            padding: 11px 16px;
+            border: none;
+            border-radius: 8px;
+            background: #2563eb;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .collaborator-form {
+            margin-bottom: 25px;
+        }
+
+        .info {
+            color: #94a3b8;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 700px) {
+            .navbar {
+                padding: 0 20px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            form {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="brand">
+            CodeCollab
+        </div>
+
+        <div class="project-name">
+            <%= project.name %>
+        </div>
+    </nav>
+
+
+    <main class="container">
+
+        <div class="header">
+            <h1><%= project.name %></h1>
+            <p>Manage your project files and collaborators.</p>
+        </div>
+
+
+        <div class="grid">
+
+            <!-- Files -->
+            <section class="card">
+
+                <h2>📁 Files</h2>
+
+                <% if (files.length === 0) { %>
+
+                    <p class="empty">
+                        No files yet. Create your first file.
+                    </p>
+
+                <% } else { %>
+
+                    <div class="file-list">
+
+                        <% files.forEach(file => { %>
+
+                            <div class="file">
+                                <a href="/project/<%= project._id %>/file/<%= file._id %>">
+                                    📄 <%= file.name %>
+                                </a>
+                            </div>
+
+                        <% }) %>
+
+                    </div>
+
+                <% } %>
+
+
+                <form
+                    action="/project/<%= project._id %>/file"
+                    method="POST"
+                >
+
+                    <input
+                        type="text"
+                        name="name"
+                        placeholder="Enter file name"
+                        required
+                    >
+
+                    <button type="submit">
+                        + Create File
+                    </button>
+
+                </form>
+
+            </section>
+
+
+            <!-- Collaborators -->
+            <section class="card">
+
+                <h2>👥 Collaborators</h2>
+
+                <p class="info">
+                    Invite another user to collaborate on this project
+                    by entering their registered email address.
+                </p>
+
+                <br>
+
+                <form
+                    class="collaborator-form"
+                    action="/project/<%= project._id %>/collaborator"
+                    method="POST"
+                >
+
+                    <input
+                        type="email"
+                        name="collaboratorEmail"
+                        placeholder="collaborator@example.com"
+                        required
+                    >
+
+                    <button type="submit">
+                        Add
+                    </button>
+
+                </form>
+
+            </section>
+
+        </div>
+
+    </main>
+
+</body>
+</html>

@@ -3,45 +3,399 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+
+    <title>CodeCollab - Projects</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+
+        /* Navbar */
+
+        .navbar {
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+
+            background: #111827;
+            border-bottom: 1px solid #334155;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+            color: #60a5fa;
+        }
+
+        .logout {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .logout:hover {
+            color: #f8fafc;
+        }
+
+        /* Main */
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 45px 25px;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #94a3b8;
+        }
+
+        /* Create project */
+
+        .create-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 22px;
+            margin-bottom: 35px;
+        }
+
+        .create-card h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .create-form {
+            display: flex;
+            gap: 12px;
+        }
+
+        .create-form input {
+            flex: 1;
+            padding: 12px 14px;
+
+            background: #0f172a;
+            border: 1px solid #475569;
+            border-radius: 8px;
+
+            color: #f8fafc;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .create-form input:focus {
+            border-color: #60a5fa;
+        }
+
+        .create-form button {
+            padding: 12px 20px;
+
+            border: none;
+            border-radius: 8px;
+
+            background: #2563eb;
+            color: white;
+
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .create-form button:hover {
+            background: #1d4ed8;
+        }
+
+        /* Projects */
+
+        .projects-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .projects-header h2 {
+            font-size: 22px;
+        }
+
+        .project-count {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .projects {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 18px;
+        }
+
+        .project-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 22px;
+
+            transition: 0.2s;
+        }
+
+        .project-card:hover {
+            border-color: #60a5fa;
+            transform: translateY(-2px);
+        }
+
+        .project-icon {
+            width: 42px;
+            height: 42px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: #172554;
+            border-radius: 9px;
+
+            margin-bottom: 15px;
+
+            font-size: 20px;
+        }
+
+        .project-card h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .project-card p {
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 18px;
+        }
+
+        .open-btn {
+            display: inline-block;
+
+            padding: 9px 14px;
+
+            background: #2563eb;
+            color: white;
+
+            border-radius: 7px;
+            text-decoration: none;
+
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .open-btn:hover {
+            background: #1d4ed8;
+        }
+
+        /* Empty state */
+
+        .empty {
+            text-align: center;
+            padding: 60px 20px;
+
+            background: #1e293b;
+            border: 1px dashed #475569;
+            border-radius: 12px;
+        }
+
+        .empty-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+
+        .empty h3 {
+            margin-bottom: 8px;
+        }
+
+        .empty p {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        /* Responsive */
+
+        @media (max-width: 600px) {
+
+            .navbar {
+                padding: 0 20px;
+            }
+
+            .container {
+                padding: 30px 15px;
+            }
+
+            .header h1 {
+                font-size: 26px;
+            }
+
+            .create-form {
+                flex-direction: column;
+            }
+
+            .create-form button {
+                width: 100%;
+            }
+
+            .projects {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
+
 <body>
-    
-    <h1>Code Collab</h1>
 
-<h2>My Projects</h2>
+    <!-- Navbar -->
 
-<form action="/project" method="POST">
-    <input
-        type="text"
-        name="name"
-        placeholder="Project name"
-        required
-    >
+    <nav class="navbar">
 
-    <button type="submit">Create Project</button>
-</form>
-
-<hr>
-
-<% if (projects.length === 0) { %>
-
-    <p>No projects yet. Create your first project!</p>
-
-<% } else { %>
-
-    <% projects.forEach(project => { %>
-
-        <div>
-            <h3><%= project.name %></h3>
-
-            <a href="/project/<%= project._id %>">
-                Open Project
-            </a>
+        <div class="logo">
+            CodeCollab
         </div>
 
-    <% }) %>
+       <form action="/user/logout" method="POST">
+    <button type="submit" class="logout">
+        Logout
+    </button>
+    </form>
 
-<% } %>
+    </nav>
+
+
+    <!-- Main -->
+
+    <main class="container">
+
+        <div class="header">
+
+            <h1>My Projects</h1>
+
+            <p>
+                Create, manage and collaborate on your coding projects.
+            </p>
+
+        </div>
+
+
+        <!-- Create Project -->
+
+        <div class="create-card">
+
+            <h2>Create a New Project</h2>
+
+            <form
+                action="/project"
+                method="POST"
+                class="create-form"
+            >
+
+                <input
+                    type="text"
+                    name="name"
+                    placeholder="Enter project name..."
+                    required
+                >
+
+                <button type="submit">
+                    + Create Project
+                </button>
+
+            </form>
+
+        </div>
+
+
+        <!-- Projects -->
+
+        <div class="projects-header">
+
+            <h2>Your Projects</h2>
+
+            <span class="project-count">
+                <%= projects.length %>
+                <%= projects.length === 1 ? "project" : "projects" %>
+            </span>
+
+        </div>
+
+
+        <% if (projects.length === 0) { %>
+
+            <div class="empty">
+
+                <div class="empty-icon">
+                    📁
+                </div>
+
+                <h3>No projects yet</h3>
+
+                <p>
+                    Create your first project to start collaborating.
+                </p>
+
+            </div>
+
+        <% } else { %>
+
+            <div class="projects">
+
+                <% projects.forEach(project => { %>
+
+                    <div class="project-card">
+
+                        <div class="project-icon">
+                            💻
+                        </div>
+
+                        <h3>
+                            <%= project.name %>
+                        </h3>
+
+                        <p>
+                            Collaborative coding project
+                        </p>
+
+                        <a
+                            href="/project/<%= project._id %>"
+                            class="open-btn"
+                        >
+                            Open Project →
+                        </a>
+
+                    </div>
+
+                <% }) %>
+
+            </div>
+
+        <% } %>
+
+    </main>
+
 </body>
 </html>

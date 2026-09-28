@@ -1,5 +1,6 @@
 const express = require(`express`);
 const http = require(`http`);
+require("dotenv").config();
 const app = express();
 const Project = require('./models/project.js')
 const { Server } = require(`socket.io`);
@@ -10,18 +11,23 @@ const io = new Server(server);
 const userRouter = require(`./router/user.js`);
 const cookie = require(`cookie-parser`);
 const checkauthentication = require(`./middleware/checkauthentication.js`);
+const RGA=require(`./Crdt/rga.js`);
+//Test
+
+// close test
 app.use(cookie());
 app.set(`view engine`, `ejs`);
 app.set(`views`, `views`);
 app.use(express.static(`public`));
 app.use(express.json());
-mongoose.connect('mongodb://localhost:27017/ChatApp').then(() => {
+mongoose.connect(process.env.MONGO_URI).then(() => {
     console.log("Database connected");
 }).catch((err) => {
     console.log(err);
 });
 app.use(express.urlencoded({ extended: true }));
 const fileUsers = {};
+let applyingRemoteOperation = false;
 io.on("connection", (socket) => {
 
     socket.on("join-file", (data) => {
@@ -40,13 +46,14 @@ io.on("connection", (socket) => {
             fileUsers[fileId],
         );
     });
-    socket.on("code-change", (data) => {
-
-        socket.to(data.fileId).emit("code-change", {
-            content: data.content
-        });
-
-    });
+    socket.on("crdt-operation", (operation)  => {
+        applyingRemoteOperation = true;
+        rga.applyOperation(operation);
+        const text=rga.getText();
+        editor.setValue(text);
+        applyingRemoteOperation = false;
+        
+    }),
     socket.on("disconnect", () => {
 
         for (const fileId in fileUsers) {
