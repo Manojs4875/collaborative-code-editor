@@ -62,7 +62,7 @@ class RGA {
             if (this.elements.has(operation.id)) {
                 return;
             }
-            if(operation.after !== null && !this.elements.has(operation.after)) {
+            if (operation.after !== null && !this.elements.has(operation.after)) {
                 // Store the operation for later processing
                 this.pendingOperations.push(operation);
                 return;
@@ -98,15 +98,16 @@ class RGA {
         let processed = true;
         while (processed) {
             processed = false;
-        for (let i = 0; i < this.pendingOperations.length;i++ ) {
-            const op = this.pendingOperations[i];
-            if(this.elements.has(op.after)) {
-                processed=true;
-                this.pendingOperations.splice(i, 1);
-                this.applyOperation(op);
-                break;
-            } 
-        }}
+            for (let i = 0; i < this.pendingOperations.length; i++) {
+                const op = this.pendingOperations[i];
+                if (this.elements.has(op.after)) {
+                    processed = true;
+                    this.pendingOperations.splice(i, 1);
+                    this.applyOperation(op);
+                    break;
+                }
+            }
+        }
     }
     getText() {
         let text = "";
@@ -136,6 +137,32 @@ class RGA {
         traverse(null);
 
         return text;
+    }
+    loadText(text) {
+        // this is bcs once server is restarted or client is refreshed, the RGA instance will be empty and we need to load the text from the database
+        let afterId = null;
+
+        for (let i = 0; i < text.length; i++) {
+
+            const id = `init:${i + 1}`;
+
+            const element = {
+                id: id,
+                value: text[i],
+                after: afterId,
+                deleted: false
+            };
+
+            this.elements.set(id, element);
+
+            if (!this.children.has(afterId)) {
+                this.children.set(afterId, []);
+            }
+
+            this.children.get(afterId).push(id);
+
+            afterId = id;
+        }
     }
 }
 
