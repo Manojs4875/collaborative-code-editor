@@ -12,6 +12,7 @@ const userRouter = require(`./router/user.js`);
 const cookie = require(`cookie-parser`);
 const checkauthentication = require(`./middleware/checkauthentication.js`);
 const RGA=require(`./Crdt/rga.js`);
+app.use(express.static(`public`));
 app.use(cookie());
 app.set(`view engine`, `ejs`);
 app.set(`views`, `views`);
@@ -28,6 +29,7 @@ let applyingRemoteOperation = false;
 io.on("connection", (socket) => {
 
     socket.on("join-file", (data) => {
+         console.log("Client connected:", socket.id);
         const { fileId, username } = data;
         socket.join(fileId);
         if (!fileUsers[fileId]) {
@@ -40,15 +42,13 @@ io.on("connection", (socket) => {
         });
 
         io.to(fileId).emit("user-joined",
-            fileUsers[fileId],
+            fileUsers[fileId], 
         );
     });
-    socket.on("crdt-operation", (operation)  => {
-        applyingRemoteOperation = true;
-        rga.applyOperation(operation);
-        const text=rga.getText();
-        editor.setValue(text);
-        applyingRemoteOperation = false;
+    socket.on("crdt-operations", (data) => {
+    console.log("Received operations:", data.operations);
+    
+    socket.to(data.fileId).emit("crdt-operations", data.operations);        
         
     }),
     socket.on("disconnect", () => {

@@ -87,11 +87,9 @@
     </main>
 
 
-    <!-- Socket.IO -->
-
+    
     <script src="/socket.io/socket.io.js"></script>
 
-    <!-- Monaco -->
 
     <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.js"></script>
 
@@ -142,15 +140,7 @@
                 let debounceTimer;
 
 
-                /*
-                 * Example file ID.
-                 *
-                 * If this page receives file data
-                 * from EJS, replace this with:
-                 *
-                 * const fileId = "<%= file._id %>";
-                 */
-
+            
                 const fileId =
                     "<%= typeof file !== 'undefined' ? file._id : '' %>";
 
@@ -203,7 +193,7 @@
 
                         if (remotechange) return;
                         // first afterId
-
+                        const operations = [];
                         for (const change of event.changes) {
                             const val = change.rangeLength;
                             if (val > 0) {
@@ -220,12 +210,12 @@
                                 for (const id of ids) {
                                     const operation = rga.delete(id);
 
-                                    // We'll broadcast this operation later.
+                                    operations.push(operation);
                                 }
                             }
 
                         }
-                        const operations = [];
+
                         for (const change of event.changes) {
                             let afterId = rga.getElementBeforePosition(
                                 change.rangeOffset
@@ -238,13 +228,19 @@
                                         afterId,
                                         val[i]
                                     );
-                                     operations.push(operation);
+                                    operations.push(operation);
                                     afterId = operation.id;
 
-                                    // We'll broadcast this operation later.
+
                                 }
 
                             }
+                        }
+                        if (operations.length > 0) {
+                            socket.emit("crdt-operations", {
+                                fileId,
+                                operations
+                            });
                         }
 
                     }
@@ -280,13 +276,7 @@
                 );
 
 
-                /*
-                 * Save button
-                 *
-                 * If you use your existing POST
-                 * save route, connect it here.
-                 */
-
+               
                 document
                     .getElementById("saveBtn")
                     .addEventListener(
