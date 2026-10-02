@@ -97,6 +97,7 @@ class RGA {
     processpending() {
         let processed = true;
         while (processed) {
+            // topo sort
             processed = false;
             for (let i = 0; i < this.pendingOperations.length; i++) {
                 const op = this.pendingOperations[i];
@@ -111,7 +112,7 @@ class RGA {
     }
     getText() {
         let text = "";
-
+        // bfs
         const traverse = (parentId) => {
 
             const children = this.children.get(parentId) || [];
@@ -142,6 +143,7 @@ class RGA {
         // this is bcs once server is restarted or client is refreshed, the RGA instance will be empty and we need to load the text from the database
         let afterId = null;
 
+
         for (let i = 0; i < text.length; i++) {
 
             const id = `init:${i + 1}`;
@@ -164,6 +166,85 @@ class RGA {
             afterId = id;
         }
     }
+   getElementBeforePosition(position) {
+    let currentPosition = 0;
+    let previousId = null;
+    let result = null;
+
+    const traverse = (parentId) => {
+        const children = this.children.get(parentId) || [];
+
+        for (const childId of children) {
+            const element = this.elements.get(childId);
+
+            if (!element) continue;
+
+            // Have we reached the required position?
+            if (currentPosition === position) {
+                result = previousId;
+                return true;
+            }
+
+            // Deleted elements are not visible in Monaco
+            if (!element.deleted) {
+                previousId = element.id;
+                currentPosition++;
+            }
+
+            // Traverse descendants even if this element is deleted
+            // it return true if decendents returns true else it will return false
+            if (traverse(element.id)) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    traverse(null);
+
+    // Handle insertion at the end of the document
+    if (result === null && currentPosition === position) {
+        return previousId;
+    }
+
+    return result;
+}
+
+getElementAtPosition(position) {
+    let currentPosition = 0;
+    let result = null;
+
+    const traverse = (parentId) => {
+        const children = this.children.get(parentId) || [];
+
+        for (const childId of children) {
+            const element = this.elements.get(childId);
+
+            if (!element) continue;
+
+            if (!element.deleted) {
+                if (currentPosition === position) {
+                    result = element.id;
+                    return true;
+                }
+
+                currentPosition++;
+            }
+
+            // Traverse descendants even if element is deleted
+            if (traverse(element.id)) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    traverse(null);
+
+    return result;
+}
 }
 
 module.exports = RGA;

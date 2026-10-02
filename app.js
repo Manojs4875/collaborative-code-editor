@@ -12,9 +12,6 @@ const userRouter = require(`./router/user.js`);
 const cookie = require(`cookie-parser`);
 const checkauthentication = require(`./middleware/checkauthentication.js`);
 const RGA=require(`./Crdt/rga.js`);
-//Test
-
-// close test
 app.use(cookie());
 app.set(`view engine`, `ejs`);
 app.set(`views`, `views`);
