@@ -4,10 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <link rel="stylesheet" href="editor.css">
+    <link rel="stylesheet" href="editor.css">
     <title>CodeCollab - Editor</title>
 
-    
+
 </head>
 
 <body>
@@ -78,11 +78,7 @@
                 ● Connected
             </span>
 
-            <button
-                type="button"
-                class="save-btn"
-                id="saveBtn"
-            >
+            <button type="button" class="save-btn" id="saveBtn">
                 Save
             </button>
 
@@ -134,17 +130,12 @@
                 );
 
 
-                /*
-                 * Socket.IO
-                 */
+
 
                 const socket = io();
 
 
-                /*
-                 * Prevent remote changes
-                 * from being emitted again.
-                 */
+
 
                 let remotechange = false;
 
@@ -208,32 +199,53 @@
                  */
 
                 editor.onDidChangeModelContent(
-                    () => {
+                    (event) => {
 
-                        if (remotechange) {
-                            return;
+                        if (remotechange) return;
+                        // first afterId
+
+                        for (const change of event.changes) {
+                            const val = change.rangeLength;
+                            if (val > 0) {
+                                const ids = [];
+                                for (let i = 0; i < val; i++) {
+                                    const id = rga.getElementAtPosition(
+                                        change.rangeOffset + i
+                                    );
+
+                                    if (id !== null) {
+                                        ids.push(id);
+                                    }
+                                }
+                                for (const id of ids) {
+                                    const operation = rga.delete(id);
+
+                                    // We'll broadcast this operation later.
+                                }
+                            }
+
                         }
+                        const operations = [];
+                        for (const change of event.changes) {
+                            let afterId = rga.getElementBeforePosition(
+                                change.rangeOffset
+                            );
+                            ind++;
+                            const val = change.text;
+                            if (val.length > 0) {
+                                for (let i = 0; i < val.length; i++) {
+                                    const operation = rga.insert(
+                                        afterId,
+                                        val[i]
+                                    );
+                                     operations.push(operation);
+                                    afterId = operation.id;
 
-                        clearTimeout(debounceTimer);
-
-                        debounceTimer = setTimeout(
-                            () => {
-
-                                if (!fileId) {
-                                    return;
+                                    // We'll broadcast this operation later.
                                 }
 
-                                socket.emit(
-                                    "code-change",
-                                    {
-                                        fileId: fileId,
-                                        content: editor.getValue()
-                                    }
-                                );
-
-                            },
-                            300
-                        );
+                            }
+                        }
 
                     }
                 );
