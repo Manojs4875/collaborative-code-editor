@@ -26,6 +26,7 @@ mongoose.connect(process.env.MONGO_URI).then(() => {
 app.use(express.urlencoded({ extended: true }));
 const fileUsers = {};
 let applyingRemoteOperation = false;
+
 io.on("connection", (socket) => {
 
     socket.on("join-file", (data) => {
@@ -46,9 +47,16 @@ io.on("connection", (socket) => {
         );
     });
     socket.on("crdt-operations", (data) => {
-    console.log("Received operations:", data.operations);
-    
-    socket.to(data.fileId).emit("crdt-operations", data.operations);        
+        console.log("Received CRDT operations:", data.operations);
+         
+        setTimeout(() => {
+        socket.to(data.fileId).emit(
+            "crdt-operation",
+            data.operations
+        ); 
+    }, 5000);
+       
+           
         
     }),
     socket.on("disconnect", () => {

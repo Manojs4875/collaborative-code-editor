@@ -4,8 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <link rel="stylesheet" href="/file.css">
-    <title>CodeCollab <%= file.name %></title>
+    <link rel="stylesheet" href="/file.css">
+    <title>CodeCollab <%= file.name %>
+    </title>
 </head>
 
 <body>
@@ -22,10 +23,7 @@
             <%= file.name %>
         </div>
 
-        <a
-            href="/project/<%= project._id %>"
-            class="back-btn"
-        >
+        <a href="/project/<%= project._id %>" class="back-btn">
             ← Back to Project
         </a>
 
@@ -64,13 +62,9 @@
         </div>
 
 
-        <!-- Editor -->
 
-        <form
-            action="/project/<%= project._id %>/file/<%= file._id %>"
-            method="POST"
-            id="saveForm"
-        >
+
+        <form action="/project/<%= project._id %>/file/<%= file._id %>" method="POST" id="saveForm">
 
             <div class="editor-container">
 
@@ -78,11 +72,7 @@
 
             </div>
 
-            <input
-                type="hidden"
-                name="content"
-                id="content"
-            >
+            <input type="hidden" name="content" id="content">
 
             <div class="bottom-bar">
 
@@ -90,10 +80,7 @@
                     ● Connected
                 </span>
 
-                <button
-                    type="submit"
-                    class="save-btn"
-                >
+                <button type="submit" class="save-btn">
                     Save File
                 </button>
 
@@ -104,11 +91,11 @@
     </main>
     <script src="/js/RGA.js"></script>
 
-    <!-- Socket.IO -->
+
 
     <script src="/socket.io/socket.io.js"></script>
 
-    <!-- Monaco -->
+
 
     <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.js"></script>
 
@@ -124,10 +111,25 @@
             ["vs/editor/editor.main"],
             function () {
 
+                // MongoDB content
+                const initialContent =
+                <%- JSON.stringify(file.content || "") %>;
+
+                // Create RGA
+                const clientId = crypto.randomUUID();
+                const rga = new RGA(clientId);
+
+                // Load MongoDB content into RGA
+                rga.loadText(initialContent);
+
+                console.log("Initial RGA text:", rga.getText());
+                console.log("RGA elements:", rga.elements);
+
+                // Now initialize Monaco from RGA
                 const editor = monaco.editor.create(
                     document.getElementById("editor"),
                     {
-                        value:<%-JSON.stringify(file.content || "") %>,
+                        value: rga.getText(),
 
                         language: "javascript",
 
@@ -153,7 +155,7 @@
                     .addEventListener(
                         "submit",
                         function () {
-                            
+
                             document
                                 .getElementById("content")
                                 .value = editor.getValue();
@@ -163,10 +165,6 @@
 
 
                 /* Socket */
-                const clientId = crypto.randomUUID();
-
-                const rga = new RGA(clientId);
-
 
                 const socket = io();
 
@@ -176,128 +174,111 @@
 
                 let remotechange = false;
 
-                
+            
+        
 
 
-                /* Join file */
-                console.log("Joining room:", fileId, username);
-                socket.emit(
-                    "join-file",
-                    {
-                        fileId: fileId,
-                        username: username
-                    }
-                );
 
 
-                /* Receive code changes */
-
-                socket.on(
-                    "crdt-operations",
-                    (operations) => {
-
-                        remotechange = true;
-                           console.log("Browser received:", operations);
-                        for(let operation of operations){
-                            rga.applyOperation(operation);
-                        }
-                        editor.setValue(rga.getText());
-                        remotechange = false;
-
-                    }
-                );
 
 
-                /* Send code changes */
 
-                editor.onDidChangeModelContent(
-                    (event) => {
 
-                        if (remotechange) return;
-                        // first afterId
-                        const operations = [];
-                        for (const change of event.changes) {
-                            const val = change.rangeLength;
-                            if (val > 0) {
-                                const ids = [];
-                                for (let i = 0; i < val; i++) {
-                                    const id = rga.getElementAtPosition(
-                                        change.rangeOffset + i
-                                    );
+        /* Join file */
+        console.log("Joining room:", fileId, username);
+        socket.emit(
+            "join-file",
+            {
+                fileId: fileId,
+                username: username
+            }
+        );
 
-                                    if (id !== null) {
-                                        ids.push(id);
-                                    }
-                                }
-                                for (const id of ids) {
-                                    const operation = rga.delete(id);
 
-                                    operations.push(operation);
-                                }
+        /* Receive code changes */
+
+        socket.on(
+            "crdt-operation",
+            (operations) => {
+
+                remotechange = true;
+                console.log("Browser received:", operations);
+                for (let operation of operations) {
+                    rga.applyOperation(operation);
+                }
+                editor.setValue(rga.getText());
+                remotechange = false;
+
+            }
+        );
+
+
+        /* Send code changes */
+
+        editor.onDidChangeModelContent(
+            (event) => {
+
+                if (remotechange) return;
+                // first afterId
+                const operations = [];
+                for (const change of event.changes) {
+                    const val = change.rangeLength;
+                    if (val > 0) {
+                        const ids = [];
+                        for (let i = 0; i < val; i++) {
+                            const id = rga.getElementAtPosition(change.rangeOffset + i); if (id !== null) {
+                                ids.push(id);
                             }
-
-                        }
-
-                        for (const change of event.changes) {
-                            let afterId = rga.getElementBeforePosition(
-                                change.rangeOffset
-                            );
-                           
-                            const val = change.text;
-                            if (val.length > 0) {
+                        } for (const id of ids) { const operation = rga.delete(id); operations.push(operation); }
+                    }
+                } for
+                    (const change of event.changes) {
+                        let afterId = rga.getElementBeforePosition(change.rangeOffset); const
+                            val = change.text; if (val.length > 0) {
                                 for (let i = 0; i < val.length; i++) {
-                                    const operation = rga.insert(
-                                        afterId,
-                                        val[i]
-                                    );
-                                    operations.push(operation);
-                                    afterId = operation.id;
-
-
+                                    const operation = rga.insert(afterId, val[i]);
+                                    operations.push(operation); afterId = operation.id;
                                 }
-
                             }
-                        }
+                } if (operations.length > 0) {
+                    console.log("Sending operations:", operations);
+                    socket.emit("crdt-operations", {
+                        fileId,
+                        operations
+                    });
+                }
 
-                        if (operations.length > 0) {
-                            console.log("Sending operations:", operations);
-                            socket.emit("crdt-operations", {
-                                fileId,
-                                operations
-                            });
-                        }
+            }
+        );
 
-                    }
-                );
+        /* Active users */
 
-                /* Active users */
+        socket.on(
+            "users-in-file",
+            (users) => {
 
-                socket.on(
-                    "users-in-file",
-                    (users) => {
+                const usersDiv =
+                    document.getElementById("users");
 
-                        const usersDiv =
-                            document.getElementById("users");
+                usersDiv.innerHTML = "";
 
-                        usersDiv.innerHTML = "";
+                users.forEach(
+                    (user) => {
 
-                        users.forEach(
-                            (user) => {
-
-                                usersDiv.innerHTML += `
-                                    <span class="user-badge">
-                                        🟢 ${user.username}
-                                    </span>
-                                `;
-
-                            }
-                        );
+                        usersDiv.innerHTML += `
+            <span class="user-badge">
+                🟢 ${user.username}
+            </span>
+            `;
 
                     }
                 );
 
             }
         );
+
+        });
+
 
     </script>
 
