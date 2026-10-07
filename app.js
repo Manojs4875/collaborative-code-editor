@@ -54,7 +54,7 @@ io.on("connection", (socket) => {
             "crdt-operation",
             data.operations
         ); 
-    }, 5000);
+    }, 5);
        
            
         

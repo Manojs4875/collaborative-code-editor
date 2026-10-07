@@ -89,7 +89,7 @@
         </form>
 
     </main>
-    <script src="/js/RGA.js"></script>
+    <script src="/js/rga.js"></script>
 
 
 
@@ -202,10 +202,17 @@
             (operations) => {
 
                 remotechange = true;
-                console.log("Browser received:", operations);
+                 console.log("BEFORE:", operations);
+        console.log("RGA:", rga.getText());
                 for (let operation of operations) {
                     rga.applyOperation(operation);
+                     console.log("AFTER:", rga.getText());
+                    console.log("Elements:", rga.elements);
+                      console.log("Children:", rga.children);
                 }
+                const finalText = rga.getText();
+
+                 console.log("FINAL TEXT:", finalText);
                 editor.setValue(rga.getText());
                 remotechange = false;
 

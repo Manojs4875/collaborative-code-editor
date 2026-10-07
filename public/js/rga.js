@@ -24,13 +24,10 @@ class RGA {
             this.children.set(afterId, []);
         }
 
-        const list = this.children.get(afterId);
-
-        list.push(uniqueId);
+        this.children.get(afterId).push(uniqueId);
 
         // deterministic ordering
-        list.sort((a, b) => b.localeCompare(a));
-
+        
         return {
             type: "insert",
             id: uniqueId,
@@ -67,25 +64,7 @@ class RGA {
                 this.pendingOperations.push(operation);
                 return;
             }
-            const element = {
-                id: operation.id,
-                value: operation.value,
-                after: operation.after,
-                deleted: false
-            };
-
-            this.elements.set(operation.id, element);
-
-            if (!this.children.has(operation.after)) {
-                this.children.set(operation.after, []);
-            }
-
-            const list = this.children.get(operation.after);
-
-            list.push(operation.id);
-
-            // Same ordering rule for remote operations
-            list.sort((a, b) => b.localeCompare(a));
+           this.insert(operation.after, operation.value);
             this.processpending();
         }
 
@@ -116,23 +95,17 @@ class RGA {
         const traverse = (parentId) => {
 
             const children = this.children.get(parentId) || [];
-
-            for (const childId of children) {
-
-                // Convert ID → actual element
+            for(let i=children.length-1;i>=0;i--){
+                const childId = children[i];
                 const element = this.elements.get(childId);
+                 if (!element) continue;
 
-                if (!element) {
-                    continue;
-                }
-
-                if (!element.deleted) {
-                    text += element.value;
-                }
-
-                // Process descendants
-                traverse(element.id);
+            if (!element.deleted) {
+                text += element.value;
             }
+
+            // Process this child's descendants
+            traverse(element.id);}
         };
 
         traverse(null);
@@ -199,7 +172,7 @@ class RGA {
         }
 
         return false;
-    };
+    }
 
     traverse(null);
 
@@ -218,7 +191,10 @@ getElementAtPosition(position) {
     const traverse = (parentId) => {
         const children = this.children.get(parentId) || [];
 
-        for (const childId of children) {
+        // LIFO
+        for (let i = children.length - 1; i >= 0; i--) {
+
+            const childId = children[i];
             const element = this.elements.get(childId);
 
             if (!element) continue;
@@ -242,6 +218,54 @@ getElementAtPosition(position) {
     };
 
     traverse(null);
+
+    return result;
+}
+
+ getElementBeforePosition(position) {
+    let currentPosition = 0;
+    let previousId = null;
+    let result = null;
+
+    const traverse = (parentId) => {
+        const children = this.children.get(parentId) || [];
+
+        // Stack: last inserted child comes first
+        for (let i = children.length - 1; i >= 0; i--) {
+
+            const childId = children[i];
+
+            const element = this.elements.get(childId);
+
+            if (!element) continue;
+
+            // Have we reached the requested position?
+            if (currentPosition === position) {
+                result = previousId;
+                return true;
+            }
+
+            // Deleted elements are not visible
+            if (!element.deleted) {
+                previousId = element.id;
+                currentPosition++;
+            }
+
+            // Still traverse descendants
+            if (traverse(element.id)) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+    traverse(null);
+
+    // Insertion at end
+    if (result === null && currentPosition === position) {
+        return previousId;
+    }
 
     return result;
 }
