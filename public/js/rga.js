@@ -64,8 +64,21 @@ class RGA {
                 this.pendingOperations.push(operation);
                 return;
             }
-           this.insert(operation.after, operation.value);
+            const element = {
+                id: operation.id,
+                value: operation.value,
+                after: operation.after,
+                deleted: false
+            };
+            this.elements.set(operation.id, element);
+             if (!this.children.has(operation.after)) {
+            this.children.set(operation.after, []);
+        }
+
+            this.children.get(operation.after).push(operation.id);
             this.processpending();
+        
+          
         }
 
         else if (operation.type === "delete") {
