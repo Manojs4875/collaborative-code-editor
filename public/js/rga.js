@@ -25,6 +25,7 @@ class RGA {
         }
 
         this.children.get(afterId).push(uniqueId);
+        this.children.get(afterId).sort();
 
         // deterministic ordering
         
@@ -76,6 +77,7 @@ class RGA {
         }
 
             this.children.get(operation.after).push(operation.id);
+            this.children.get(operation.after).sort();
             this.processpending();
         
           
@@ -132,7 +134,7 @@ class RGA {
 
         for (let i = 0; i < text.length; i++) {
 
-            const id = `init:${i + 1}`;
+            const id = `ZZZZZ:${i + 1}`;
 
             const element = {
                 id: id,

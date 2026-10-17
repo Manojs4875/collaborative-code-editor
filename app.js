@@ -54,7 +54,7 @@ io.on("connection", (socket) => {
             "crdt-operation",
             data.operations
         ); 
-    }, 5000);
+    }, 50);
        
            
         
@@ -95,6 +95,7 @@ app.get('/register', (req, res) => {
 });
 app.use('/project', checkauthentication, projectRouter);
 app.use('/user', userRouter);
-server.listen(8000, () => {
-    console.log(`server is running on port 8000`);
+const port =process.env.PORT||8000;
+server.listen(port, () => {
+    console.log(`server is running on port ${port}`);
 });
